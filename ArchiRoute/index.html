@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ArchiRoute — 건축 답사지 추천</title>
+  <meta name="description" content="팀원 출발지를 입력하면 모두에게 공정한 건축 답사지를 추천해드립니다." />
+
+  <!-- Inter font (arcadia 대체) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@350..540&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+
+  <!-- ─── Navigation ──────────────────────────────────────────── -->
+  <nav class="site-nav" aria-label="사이트 메인 내비게이션">
+    <div class="container">
+      <a href="." class="nav-logo">Archi<span>Route</span></a>
+      <span class="nav-tagline">건축 답사지 추천 서비스</span>
+    </div>
+  </nav>
+
+  <!-- ─── Hero ────────────────────────────────────────────────── -->
+  <section class="hero" aria-label="서비스 소개">
+    <div class="container">
+      <p class="hero__eyebrow">Architecture Field Trip Planner</p>
+      <h1 class="hero__title">팀원 모두에게 <em>공정한</em><br />답사지를 찾아드립니다</h1>
+      <p class="hero__sub">
+        각자 출발하는 지하철역을 입력하면,<br />
+        건축 유형에 맞는 최적 답사지를 거리 기반으로 추천합니다.
+      </p>
+    </div>
+  </section>
+
+  <!-- ─── Main ─────────────────────────────────────────────────── -->
+  <main>
+    <div class="container">
+      <div class="main-layout">
+
+        <!-- ── Left panel: Input ──────────────────────────────── -->
+        <aside class="panel" aria-label="검색 조건">
+
+          <!-- Member input -->
+          <section class="panel__section" aria-labelledby="members-label">
+            <div class="panel__header">
+              <span class="panel__label" id="members-label">팀원 출발지</span>
+              <span class="panel__count" id="member-count" aria-live="polite">2명</span>
+            </div>
+
+            <div id="member-list" role="list" aria-label="팀원 목록">
+              <!-- Rows injected by app.js -->
+            </div>
+
+            <button id="add-member-btn" aria-label="팀원 추가 (최대 6명)">
+              + 팀원 추가
+            </button>
+          </section>
+
+          <!-- Category filter -->
+          <section class="panel__section" aria-labelledby="filter-label">
+            <span class="panel__label" id="filter-label">건축물 유형</span>
+            <p style="font-size:12px;color:var(--slate);margin-bottom:10px;">
+              선택 없이 검색하면 전체 유형을 대상으로 합니다.
+            </p>
+            <div id="category-filters" role="group" aria-label="유형 필터" aria-multiselectable="true">
+              <!-- Chips injected by app.js -->
+            </div>
+          </section>
+
+          <!-- Top N -->
+          <section class="panel__section">
+            <span class="panel__label">추천 개수</span>
+            <div class="top-n-row">
+              <label for="top-n-select">상위</label>
+              <select id="top-n-select" aria-label="추천 결과 개수">
+                <option value="3">3개</option>
+                <option value="5" selected>5개</option>
+                <option value="8">8개</option>
+                <option value="10">10개</option>
+              </select>
+              <span>곳 추천</span>
+            </div>
+          </section>
+
+          <!-- Search button -->
+          <button id="search-btn" disabled aria-label="답사지 추천 검색">
+            답사지 추천 받기
+          </button>
+
+        </aside>
+
+        <!-- ── Right: Results ─────────────────────────────────── -->
+        <section id="results-section" class="is-hidden" aria-label="추천 결과">
+
+          <!-- Map -->
+          <div id="map" aria-label="답사지 지도" role="application"></div>
+
+          <!-- Results header -->
+          <div class="results-header">
+            <h2 class="results-title" aria-live="polite" id="results-title">추천 답사지</h2>
+          </div>
+
+          <!-- Cards -->
+          <div
+            id="results-container"
+            role="list"
+            aria-label="추천 답사지 목록"
+            aria-live="polite"
+            aria-atomic="true"
+          ></div>
+
+          <!-- Disclaimer -->
+          <p class="disclaimer">
+            ※ 거리는 직선거리 기준이며 실제 이동 시간·경로와 다를 수 있습니다.
+            방문 전 각 시설의 운영시간 및 예약 여부를 확인하세요.
+          </p>
+
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- ─── Modal ─────────────────────────────────────────────────── -->
+  <div
+    id="modal-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-heading"
+    aria-hidden="true"
+  >
+    <div id="modal-card">
+      <button id="modal-close" aria-label="모달 닫기">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- ─── Footer ───────────────────────────────────────────────── -->
+  <footer class="site-footer" aria-label="사이트 푸터">
+    <div class="container">
+      <div class="footer-inner">
+        <span class="footer-logo">Archi<span>Route</span></span>
+        <p class="footer-note">
+          답사지 데이터는 서울특별시 건축상 수상작, 국공립 미술관·박물관, 주요 근현대 건축물 등을 바탕으로 작성되었습니다.
+          정보 오류가 있을 경우 각 시설 공식 홈페이지를 우선 확인하세요.
+          거리 계산은 직선거리(Haversine) 기준입니다.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ─── Scripts ──────────────────────────────────────────────── -->
+  <!-- API key loaded from config.js (not committed) -->
+  <script src="config.js"></script>
+
+  <!-- App modules -->
+  <script src="data/sites.js"></script>
+  <script src="js/subway.js"></script>
+  <script src="js/recommend.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- Google Maps — loaded last, calls initMap() on ready -->
+  <script>
+    // Build Maps API URL using key from config.js
+    (function () {
+      if (typeof CONFIG === 'undefined' || !CONFIG.GOOGLE_MAPS_API_KEY ||
+          CONFIG.GOOGLE_MAPS_API_KEY === 'YOUR_GOOGLE_MAPS_API_KEY_HERE') {
+        console.warn(
+          '[ArchiRoute] config.js에 Google Maps API 키가 설정되지 않았습니다.\n' +
+          'config.example.js를 복사해 config.js를 만들고 실제 키를 입력하세요.'
+        );
+        // Scripts are at end of <body>, so DOM is already ready — call directly
+        initMap();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src =
+        'https://maps.googleapis.com/maps/api/js?key=' +
+        CONFIG.GOOGLE_MAPS_API_KEY +
+        '&callback=initMap&loading=async';
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  </script>
+
+
+</body>
+</html>
